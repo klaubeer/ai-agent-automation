@@ -11,9 +11,31 @@ The agents are capable of handling:
 
 These solutions were applied across different industries such as fitness centers, printing companies, real estate agencies, and service businesses, helping reduce operational workload and significantly improve response time to customers.
 
-Stack:
-Python, Large Language Models (LLM), AI Agents, RAG (Retrieval-Augmented Generation), Prompt Engineering, Redis (session memory), Supabase (database), REST APIs, Workflow Automation, Messaging platform integrations, Hugging Face (models and inference), ElevenLabs (text-to-speech), ChatGuru integration, Webhooks and external system integrations.
+AI Conversational Agent with RAG and WhatsApp Integration
 
+This project demonstrates an end-to-end conversational AI architecture built with n8n workflows.
+
+Features:
+
+• AI conversational agent using LLMs
+• Retrieval Augmented Generation (RAG)
+• Vector search with Supabase
+• Conversation memory
+• WhatsApp integration
+• Multimodal input (text, audio, image)
+• Message chunking for chat UX
+• Automated conversation logging
+
+Tech Stack
+
+Python
+LLMs
+RAG
+Supabase Vector Database
+Redis Memory
+n8n Workflows
+REST APIs
+Automation Pipelines
 
 
 ======================================================================
