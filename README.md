@@ -506,13 +506,4 @@ n8n manages:
 ✔ Tool execution
 ✔ Scalable architecture
 
----
-
-💡 **Dica de portfólio:**
-Esse README já está bom, mas se quiser deixar **nível senior mesmo**, o próximo passo seria adicionar:
-
-* **diagramas visuais da arquitetura**
-* **diagrama do pipeline RAG**
-* **seção "Engineering Decisions"**
-
 Se quiser, eu também posso te gerar **um diagrama de arquitetura profissional (tipo big tech)** para colocar no README. Isso aumenta MUITO o impacto do GitHub.
