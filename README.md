@@ -1,509 +1,190 @@
-# 🇧🇷 PT-BR
+<div align="center">
 
-# AI Conversational Agent Platform
+# 🤖 Plataforma de Agente Conversacional com IA
 
-Plataforma de **Agentes Conversacionais baseados em Inteligência Artificial** para automação de atendimento, qualificação de leads, suporte ao cliente e execução de processos comerciais.
+**Agente de IA autônomo construído inteiramente no n8n — integrando LLMs, RAG, processamento multimodal e automação de workflows empresariais via WhatsApp.**
 
-O projeto demonstra uma **arquitetura completa de IA aplicada**, combinando **LLMs, RAG avançado, automação de workflows e integração com sistemas externos**.
+[![n8n](https://img.shields.io/badge/Orquestração-n8n-EA4B71?style=flat-square&logo=n8n&logoColor=white)](https://n8n.io)
+[![Supabase](https://img.shields.io/badge/Banco_de_Dados-Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
+[![Redis](https://img.shields.io/badge/Cache-Redis-DC382D?style=flat-square&logo=redis&logoColor=white)](https://redis.io)
+[![WhatsApp](https://img.shields.io/badge/Canal-WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white)](https://whatsapp.com)
 
-O agente atua como um **Agente Atendente**, capaz de conversar com usuários, acessar bases de conhecimento da empresa, consultar sistemas internos e executar ações automaticamente.
-
----
-
-# Arquitetura do Sistema
-
-Fluxo de alto nível da arquitetura:
-
-```
-Usuário (WhatsApp)
-↓
-Gateway de Mensageria
-↓
-Workflow Orchestrator (n8n)
-↓
-Processamento de intenção
-↓
-Hybrid Retrieval (Vector Search + Context Memory)
-↓
-Seleção de contexto
-↓
-LLM Reasoning
-↓
-Execução de Tools / APIs
-↓
-Geração da resposta
-↓
-Resposta + Fontes
-```
-
-A arquitetura combina:
-
-* LLM reasoning
-* recuperação semântica (RAG)
-* execução de ferramentas
-* automação de processos
-
-Permitindo que o agente funcione como uma **interface inteligente para sistemas empresariais**.
+</div>
 
 ---
 
-# Pipeline de RAG
+## Visão Geral
 
-O sistema implementa um pipeline completo de **Retrieval Augmented Generation**.
+Este projeto é um **agente de IA totalmente autônomo** que roda como um conjunto de workflows no n8n — sem backend customizado. O agente conduz interações completas com clientes via WhatsApp: qualifica leads, responde perguntas a partir de uma base de conhecimento da empresa, agenda compromissos e registra cada interação automaticamente.
 
-### Ingestão automática de conhecimento
+A arquitetura combina **raciocínio via LLM**, **RAG com busca vetorial nativa**, **memória de sessão em Redis** e **chamada de ferramentas (tool calling)** — tudo orquestrado visualmente dentro do n8n.
 
-Documentos são carregados automaticamente de:
+---
 
-* Google Drive
-* bases internas
-* arquivos empresariais
-
-O pipeline realiza:
+## Arquitetura
 
 ```
-Documentos
-↓
-Parsing
-↓
-Chunking
-↓
-Embeddings
-↓
-Vector Storage
+WhatsApp (Usuário)
+        │
+        ▼
+  Gateway de Mensageria
+        │
+        ▼
+  Orquestrador n8n
+        │
+        ├─── Controle de Sessão (Redis)
+        │         └─── Número do usuário → estado da sessão
+        │
+        ├─── Roteador de Intenção
+        │
+        ├─── Recuperação Híbrida
+        │         ├─── Busca Vetorial (Supabase pgvector)
+        │         └─── Memória Conversacional (Redis)
+        │
+        ├─── Raciocínio LLM + Tool Calling
+        │         ├─── Google Calendar API
+        │         ├─── Cadastro de Leads (Supabase / PostgreSQL)
+        │         └─── APIs Externas
+        │
+        └─── Geração de Resposta
+                  └─── Texto / Áudio / Imagem → WhatsApp
 ```
 
 ---
 
-### Banco vetorial
+## O que o Agente Faz
 
-Os embeddings são armazenados no **Supabase Vector Database**, permitindo:
+### 🧠 Pipeline de RAG Completo
 
-* busca semântica
-* recuperação contextual
-* grounding das respostas
+Documentos são ingeridos automaticamente do **Google Drive** e fontes internas, divididos em chunks, transformados em embeddings e armazenados como vetores no **Supabase (pgvector)**. Quando um usuário faz uma pergunta, o agente:
+
+1. Gera o embedding da pergunta
+2. Executa busca por similaridade semântica na base vetorial
+3. Recupera os trechos mais relevantes
+4. Ancora a resposta do LLM no conhecimento real da empresa
+
+Nenhuma alucinação — cada resposta é fundamentada no contexto recuperado.
+
+### 📋 Qualificação de Leads (AI SDR)
+
+- Coleta e valida dados do cliente através de conversa natural
+- Cria registros de usuário no PostgreSQL / Supabase automaticamente
+- Registra dados estruturados de interação para integração com CRM
+- Conduz o fluxo completo de qualificação sem intervenção humana
+
+### 📅 Agendamento Inteligente
+
+- Verifica disponibilidade em tempo real via **Google Calendar API**
+- Agenda, confirma e reagenda compromissos de forma autônoma
+- Envia mensagens de confirmação de volta ao usuário
+
+### 💬 Sessão e Memória Conversacional
+
+- Cada número de WhatsApp possui sua própria sessão isolada no **Redis**
+- O histórico da conversa é mantido ao longo de múltiplas mensagens
+- O agente reconstrói o contexto mesmo quando mensagens chegam fragmentadas (padrão comum no WhatsApp)
+- Sessões expiram automaticamente após inatividade
+
+### 🖼️ Processamento Multimodal
+
+O agente compreende e processa:
+
+| Tipo de Entrada | Processamento |
+|---|---|
+| Texto | Processamento direto pelo LLM |
+| Áudio | Transcrição → pipeline de texto |
+| Imagens | Análise via modelo de visão |
+| Vídeo | Extração de frames + análise |
+
+### 🪵 Log de Usuário e Auditoria
+
+- Toda interação é registrada com timestamp, ID de sessão e conteúdo
+- Perfis de usuário são criados no primeiro contato e enriquecidos ao longo do tempo
+- Trilha de auditoria completa disponível no Supabase para análise e conformidade
 
 ---
 
-### Processo de recuperação
+## Stack Tecnológica
 
-Quando o usuário faz uma pergunta:
+| Camada | Tecnologia |
+|---|---|
+| **Orquestração** | n8n (toda a lógica do agente reside aqui) |
+| **LLM** | OpenAI / provedores compatíveis via nós de IA do n8n |
+| **Base Vetorial** | Supabase pgvector |
+| **Embeddings** | Hugging Face / OpenAI Embeddings |
+| **Memória de Sessão** | Redis |
+| **Banco Principal** | Supabase (PostgreSQL) |
+| **Mensageria** | WhatsApp Business API |
+| **Síntese de Voz** | ElevenLabs |
+| **Calendário** | Google Calendar API |
+| **Fonte de Documentos** | Google Drive |
+
+---
+
+## Decisões de Arquitetura
+
+**Tudo no n8n** — toda a lógica do agente, incluindo ingestão de RAG, recuperação, chamadas ao LLM, execução de ferramentas e formatação de resposta, roda como workflows n8n. Isso torna o sistema visual, auditável e fácil de modificar sem necessidade de deploy de código.
+
+**Supabase como backend unificado** — um único projeto Supabase gerencia a base vetorial (pgvector), dados relacionais (perfis de clientes, leads, logs) e serve como fonte única da verdade. Sem banco vetorial separado para administrar.
+
+**Redis para isolamento de sessão** — usuários do WhatsApp são identificados pelo número de telefone. O Redis mapeia cada número para um contexto de sessão ativo, permitindo conversas multi-turno com estado em escala, sem overhead de banco de dados a cada mensagem.
+
+**Tratamento de mensagens fragmentadas** — usuários do WhatsApp frequentemente enviam pensamentos em múltiplas mensagens rápidas. O agente armazena em buffer e reconstrói essas mensagens em um input coerente antes de processar, eliminando respostas fora de contexto.
+
+---
+
+## Fluxo de Ingestão RAG
 
 ```
-Pergunta do usuário
-↓
-Embedding da pergunta
-↓
-Busca semântica no vetor database
-↓
-Recuperação dos documentos mais relevantes
-↓
-Seleção de contexto
-↓
-Envio para o LLM
-↓
-Resposta baseada em conhecimento real
+Google Drive / Documentos Internos
+            │
+            ▼
+     Workflow de Ingestão (n8n)
+            │
+            ├─── Parsing de Documentos
+            ├─── Chunking (tamanho e overlap configuráveis)
+            ├─── Geração de Embeddings
+            └─── Upsert no Supabase pgvector
 ```
 
----
-
-# Funcionalidades do Agente
-
-## AI SDR (Qualificação de Leads)
-
-* qualificação automática de leads
-* coleta de dados do cliente
-* criação de cadastro
-* integração com CRM
+A ingestão roda por agendamento ou pode ser disparada manualmente. Novos documentos são detectados automaticamente.
 
 ---
 
-## Atendimento ao Cliente
+## Resumo de Funcionalidades
 
-* respostas automáticas via RAG
-* acesso à base de conhecimento da empresa
-* suporte pós-venda
-* resolução de dúvidas frequentes
-
----
-
-## Agendamento Inteligente
-
-Integração com **Google Calendar** para:
-
-* verificação de disponibilidade
-* criação automática de compromissos
-* confirmação de agendamentos
+| Funcionalidade | Status |
+|---|---|
+| Integração com WhatsApp | ✅ |
+| RAG com pgvector | ✅ |
+| Controle de sessão por número de telefone | ✅ |
+| Criação de perfil e log de usuário | ✅ |
+| Fluxo de qualificação de leads | ✅ |
+| Agendamento via Google Calendar | ✅ |
+| Multimodal (texto, áudio, imagem, vídeo) | ✅ |
+| Memória de sessão com Redis | ✅ |
+| Persistência de dados no PostgreSQL | ✅ |
+| Orquestração completa no n8n (sem backend customizado) | ✅ |
 
 ---
 
-## Memória Conversacional
+## Como Começar
 
-Utiliza **Redis** para manter memória de sessão:
+### Pré-requisitos
 
-* contexto da conversa
-* histórico de interações
-* continuidade do atendimento
+- Instância n8n (self-hosted ou cloud)
+- Projeto Supabase com extensão pgvector habilitada
+- Instância Redis
+- Acesso à WhatsApp Business API
+- Projeto no Google Cloud (APIs do Calendar e Drive)
 
----
+### Configuração
 
-## Processamento Multimodal
+1. **Clone** este repositório e importe os arquivos JSON de workflow no n8n
+2. **Configure as credenciais** no n8n para Supabase, Redis, WhatsApp e APIs do Google
+3. **Execute o workflow de ingestão** para popular a base vetorial com seus documentos
+4. **Ative o workflow principal do agente** — o webhook estará ativo
 
-O agente suporta:
-
-* texto
-* áudio
-* imagens
-* vídeos
-
-Com processamento automático de mídia.
+Referência detalhada de variáveis de ambiente e configuração de credenciais em [`docs/setup.md`](docs/setup.md).
 
 ---
-
-## Inteligência de Conversa
-
-O sistema trata particularidades do WhatsApp:
-
-* mensagens fragmentadas
-* envio múltiplo de mensagens
-* reconstrução de contexto da conversa
-
----
-
-# Banco de Dados
-
-O sistema utiliza **Supabase** como backend principal.
-
-Armazena:
-
-* cadastro de clientes
-* histórico de conversa
-* leads
-* logs de interação
-
----
-
-# Orquestração de Workflows
-
-Toda a lógica do sistema é orquestrada por **n8n**.
-
-O n8n gerencia:
-
-* automações
-* integrações com APIs
-* pipelines de IA
-* execução de ferramentas
-
----
-
-# Stack Tecnológica
-
-### Inteligência Artificial
-
-* Large Language Models
-* AI Agents
-* Prompt Engineering
-* Tool Calling
-
----
-
-### Retrieval
-
-* RAG (Retrieval Augmented Generation)
-* Embeddings
-* Vector Search
-
----
-
-### Backend
-
-* Python
-* Redis
-* Supabase
-
----
-
-### Automação
-
-* n8n
-* Webhooks
-* REST APIs
-
----
-
-### Integrações
-
-* WhatsApp APIs
-* Google Drive
-* Google Calendar
-* Hugging Face
-* ElevenLabs
-
----
-
-# Características da Arquitetura
-
-✔ Agente conversacional baseado em LLM
-✔ Pipeline RAG completo
-✔ Integração com WhatsApp
-✔ Memória de conversação
-✔ Processamento multimodal
-✔ Automação de processos empresariais
-✔ Integração com sistemas externos
-✔ Arquitetura escalável
-
----
-
-# 🇺🇸 English Version
-
-# AI Conversational Agent Platform
-
-AI-powered conversational agent platform designed to automate **customer support, lead qualification, scheduling, and operational workflows**.
-
-This project demonstrates a **production-grade conversational AI architecture**, combining **LLMs, advanced RAG pipelines, workflow automation, and messaging platform integrations**.
-
-The agent functions as an **AI SDR and operational assistant**, capable of interacting with users, accessing company knowledge bases, and executing actions in internal systems.
-
----
-
-# System Architecture
-
-High-level architecture flow:
-
-```
-User (WhatsApp)
-↓
-Messaging Gateway
-↓
-Workflow Orchestrator (n8n)
-↓
-Intent Processing
-↓
-Hybrid Retrieval (Vector Search + Context Memory)
-↓
-Context Selection
-↓
-LLM Reasoning
-↓
-Tool / API Execution
-↓
-Response Generation
-↓
-Answer + Sources
-```
-
-The architecture combines:
-
-* LLM reasoning
-* semantic retrieval
-* tool execution
-* workflow automation
-
-This allows the system to act as an **AI-powered interface for enterprise systems**.
-
----
-
-# RAG Pipeline
-
-The system implements a full **Retrieval Augmented Generation pipeline**.
-
-### Knowledge ingestion
-
-Documents are automatically loaded from:
-
-* Google Drive
-* internal knowledge bases
-* company documentation
-
-Processing pipeline:
-
-```
-Documents
-↓
-Parsing
-↓
-Chunking
-↓
-Embeddings
-↓
-Vector Storage
-```
-
----
-
-### Vector database
-
-Embeddings are stored in **Supabase Vector Database**, enabling:
-
-* semantic search
-* contextual retrieval
-* grounded responses
-
----
-
-### Retrieval flow
-
-When a user asks a question:
-
-```
-User Query
-↓
-Query Embedding
-↓
-Semantic Vector Search
-↓
-Relevant Document Retrieval
-↓
-Context Selection
-↓
-LLM Generation
-↓
-Answer grounded in retrieved knowledge
-```
-
----
-
-# Agent Capabilities
-
-## AI SDR
-
-* automated lead qualification
-* customer data collection
-* contact registration
-* CRM integration
-
----
-
-## Customer Support
-
-* FAQ automation using RAG
-* company knowledge retrieval
-* post-sale support
-* information queries
-
----
-
-## Intelligent Scheduling
-
-Integration with **Google Calendar** for:
-
-* availability checking
-* automated appointment booking
-* scheduling confirmation
-
----
-
-## Conversation Memory
-
-The system uses **Redis session memory** to maintain context:
-
-* conversation history
-* follow-up questions
-* persistent session state
-
----
-
-## Multimodal Processing
-
-The agent can process:
-
-* text messages
-* audio
-* images
-* videos
-
----
-
-## Messaging Intelligence
-
-The system handles messaging platform quirks such as:
-
-* fragmented messages
-* multi-message input
-* conversation reconstruction
-
----
-
-# Database Layer
-
-The system uses **Supabase** as its primary database.
-
-Stored data includes:
-
-* customer profiles
-* conversation logs
-* leads
-* interaction history
-
----
-
-# Workflow Orchestration
-
-The system is orchestrated using **n8n workflows**.
-
-n8n manages:
-
-* agent orchestration
-* automation pipelines
-* external integrations
-* tool execution
-
----
-
-# Tech Stack
-
-### AI
-
-* Large Language Models
-* AI Agents
-* Prompt Engineering
-* Tool Calling
-
----
-
-### Retrieval
-
-* Retrieval Augmented Generation
-* Embeddings
-* Vector Search
-
----
-
-### Backend
-
-* Python
-* Redis
-* Supabase
-
----
-
-### Automation
-
-* n8n
-* Webhooks
-* REST APIs
-
----
-
-### Integrations
-
-* WhatsApp APIs
-* Google Drive
-* Google Calendar
-* Hugging Face
-* ElevenLabs
-
----
-
-# Architecture Characteristics
-
-✔ Conversational AI agent
-✔ Full RAG pipeline
-✔ WhatsApp automation
-✔ Multimodal processing
-✔ Conversation memory
-✔ Enterprise workflow automation
-✔ Tool execution
-✔ Scalable architecture
-
-Se quiser, eu também posso te gerar **um diagrama de arquitetura profissional (tipo big tech)** para colocar no README. Isso aumenta MUITO o impacto do GitHub.
