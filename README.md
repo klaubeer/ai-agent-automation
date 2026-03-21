@@ -21,7 +21,7 @@ A arquitetura combina **raciocínio via LLM**, **RAG com busca vetorial nativa**
 
 ---
 
-## Arquitetura
+## Arquitetura (veja o screenshot.png na raiz do diretório)
 
 ```
 WhatsApp (Usuário)
